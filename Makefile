@@ -26,6 +26,6 @@ build:
 	@mkdir -p build/tests
 
 clean:
-	rm -r ./build
+	rm -rf ./build
 
 
