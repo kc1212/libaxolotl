@@ -17,7 +17,7 @@ static int hkdf_expand(const unsigned char* prk, const size_t prklen,
 			const unsigned char* info, const size_t infolen,
 			const int outlen, unsigned char* out);
 
-int hkdf_create_for(int message_version)
+int hkdf_init(int message_version)
 {
 	int ret = -1;
 	switch (message_version) {

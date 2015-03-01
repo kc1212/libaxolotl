@@ -40,7 +40,7 @@ static char* test_vector_v3()
 	const size_t outlen = sizeof okm;
 	unsigned char out[outlen];
 
-	int ret = hkdf_create_for(3);
+	int ret = hkdf_init(3);
 	mu_assert("wrong ret", 0 == ret);
 
 	ret = hkdf_derive_secrets(ikm, sizeof ikm, salt, sizeof salt, info, sizeof info, outlen, out);
@@ -131,7 +131,7 @@ static char* test_vector_long_v3()
 	const size_t outlen = sizeof okm;
 	unsigned char out[outlen];
 
-	int ret = hkdf_create_for(3);
+	int ret = hkdf_init(3);
 	mu_assert("", 0 == ret);
 
 	ret = hkdf_derive_secrets(ikm, sizeof ikm, salt, sizeof salt, info, sizeof info, outlen, out);
@@ -177,7 +177,7 @@ static char* test_vector_v2()
 	const size_t outlen = sizeof okm;
 	unsigned char out[outlen];
 
-	int ret = hkdf_create_for(2);
+	int ret = hkdf_init(2);
 	mu_assert("", 0 == ret);
 
 	ret = hkdf_derive_secrets(ikm, sizeof ikm, salt, sizeof salt, info, sizeof info, outlen, out);
@@ -195,7 +195,7 @@ static char * all_tests() {
 	return 0;
 }
 
-int main(int argc, char **argv)
+int main()
 {
 	char *result = all_tests();
 	if (result != 0) {
