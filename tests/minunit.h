@@ -3,6 +3,8 @@
 #ifndef _minunit_h
 #define _minunit_h
 
+#include <string.h>
+
 #define mu_assert(message, test) \
 	do { \
 		if (!(test)) \

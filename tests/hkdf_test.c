@@ -188,7 +188,8 @@ static char* test_vector_v2()
 
 int tests_run = 0;
 
-static char * all_tests() {
+static char* all_tests()
+{
 	mu_run_test(test_vector_v3);
 	mu_run_test(test_vector_long_v3);
 	mu_run_test(test_vector_v2);
