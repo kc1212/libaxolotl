@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <sodium.h>
 
 #include "minunit.h"
 #include "../src/kdf/derived_root_secrets.h"
@@ -16,8 +17,8 @@ static char* test_drs()
 	}
 
 	drs_init(in, &drs);
-	mu_assert("", 0 == memcmp(drs.root_key, in, 32));
-	mu_assert("", 0 == memcmp(drs.chain_key, in + 32, 32));
+	mu_assert("", 0 == sodium_memcmp(drs.root_key, in, 32));
+	mu_assert("", 0 == sodium_memcmp(drs.chain_key, in + 32, 32));
 
 	return 0;
 }

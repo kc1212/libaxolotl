@@ -38,7 +38,7 @@ int hkdf_derive_secrets_zerosalt(const unsigned char* in, const size_t inlen,
 		const int outlen, unsigned char* out)
 {
 	unsigned char salt[HASH_OUTSZ];
-	memset(salt, 0, sizeof salt);
+	sodium_memzero(salt, sizeof salt);
 	return hkdf_derive_secrets(in, inlen, salt, sizeof salt, info, infolen, outlen, out);
 }
 
@@ -72,8 +72,8 @@ static int hkdf_expand(const unsigned char* prk, const size_t prklen,
 	unsigned char mixin[crypto_auth_hmacsha256_BYTES];
 	int remaining_bytes = outlen;
 
-	memset(out, 0, outlen);
-	memset(mixin, 0, sizeof mixin);
+	sodium_memzero(out, outlen);
+	sodium_memzero(mixin, sizeof mixin);
 
 	unsigned char* tmp_res = out;
 	for (int i = iteration_start_offset; i < iters + iteration_start_offset; i++){

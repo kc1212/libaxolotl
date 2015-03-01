@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <sodium.h>
 
 #include "minunit.h"
 #include "../src/kdf/derived_message_secrets.h"
@@ -16,9 +17,9 @@ static char* test_dms()
 	}
 
 	dms_init(in, &dms);
-	mu_assert("", 0 == memcmp(dms.cipher_key, in, DMS_CIPHER_KEY_LEN));
-	mu_assert("", 0 == memcmp(dms.mac_key, in + DMS_CIPHER_KEY_LEN, DMS_MAC_KEY_LEN));
-	mu_assert("", 0 == memcmp(dms.iv, in + DMS_CIPHER_KEY_LEN + DMS_MAC_KEY_LEN, DMS_IV_LEN));
+	mu_assert("", 0 == sodium_memcmp(dms.cipher_key, in, DMS_CIPHER_KEY_LEN));
+	mu_assert("", 0 == sodium_memcmp(dms.mac_key, in + DMS_CIPHER_KEY_LEN, DMS_MAC_KEY_LEN));
+	mu_assert("", 0 == sodium_memcmp(dms.iv, in + DMS_CIPHER_KEY_LEN + DMS_MAC_KEY_LEN, DMS_IV_LEN));
 
 	return 0;
 }
