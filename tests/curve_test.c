@@ -9,8 +9,8 @@ int tests_run = 0;
 
 static char* test_key_bytes()
 {
-	mu_assert("wrong ret", 32U == crypto_scalarmult_curve25519_BYTES);
-	mu_assert("wrong ret", 32U == crypto_scalarmult_BYTES);
+	mu_assert("", 32U == crypto_scalarmult_curve25519_BYTES);
+	mu_assert("", 32U == crypto_scalarmult_BYTES);
 	return 0;
 }
 

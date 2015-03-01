@@ -7,6 +7,8 @@
 #define CURVE_PUBLIC_SERIALIZEDLEN (crypto_scalarmult_curve25519_BYTES + 1)
 #define CURVE_SECRET_SERIALIZEDLEN (crypto_scalarmult_curve25519_BYTES)
 
+// we're using Curve25519 keys
+
 struct curve_pk {
 	int type;
 	unsigned char bytes[crypto_scalarmult_curve25519_BYTES];

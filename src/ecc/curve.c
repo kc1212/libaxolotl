@@ -10,11 +10,19 @@ static const int CURVE_DJB_TYPE = 0x05;
 
 int curve_generate_keypair(struct curve_key_pair* pair)
 {
+	unsigned char ed25519_pk[crypto_sign_ed25519_PUBLICKEYBYTES];
+	unsigned char ed25519_skpk[crypto_sign_ed25519_SECRETKEYBYTES];
+
+	crypto_sign_ed25519_keypair(ed25519_pk, ed25519_skpk);
+	crypto_sign_ed25519_pk_to_curve25519(pair->pk.bytes, ed25519_pk);
+	crypto_sign_ed25519_sk_to_curve25519(pair->sk.bytes, ed25519_skpk);
+
 	pair->pk.type = CURVE_DJB_TYPE;
 	pair->sk.type = CURVE_DJB_TYPE;
 
-	// TODO this generates Ed25519 keys, need to covnert to Curve25519 keys
-	return crypto_sign_keypair(pair->pk.bytes, pair->sk.bytes);
+	sodium_memzero(ed25519_pk, crypto_sign_ed25519_PUBLICKEYBYTES);
+	sodium_memzero(ed25519_skpk, crypto_sign_ed25519_SECRETKEYBYTES);
+	return 0;
 }
 
 int curve_decode_point(const unsigned char* bytes, const int offset,
@@ -36,7 +44,7 @@ int curve_decode_private_point(const unsigned char* bytes, const size_t byteslen
 {
 	// TODO  check for null
 	if (byteslen > crypto_scalarmult_curve25519_BYTES)
-		return -1;
+		return AXOLOTL_INVALID_KEYLEN;
 
 	sodium_memzero(sk->bytes, crypto_scalarmult_curve25519_BYTES);
 	sk->type = CURVE_DJB_TYPE;
