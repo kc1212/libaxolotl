@@ -19,7 +19,9 @@ TEST_HEADER:=tests/minunit.h
 .PHONY: all test clean build
 
 all: $(OBJECTS)
+
 test: $(TEST_EXES)
+	./run_all_tests.sh
 
 build/tests/%: tests/%.c $(TEST_HEADER) $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDLIBS) -o $@ $< $(OBJECTS)
