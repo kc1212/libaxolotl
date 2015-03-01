@@ -40,10 +40,8 @@ static char* test_vector_v3()
 	const size_t outlen = sizeof okm;
 	unsigned char out[outlen];
 
-	int ret = hkdf_init(3);
-	mu_assert("wrong ret", 0 == ret);
-
-	ret = hkdf_derive_secrets(ikm, sizeof ikm, salt, sizeof salt, info, sizeof info, outlen, out);
+	int ret = hkdf_derive_secrets(HKDF_MESSAGE_V3, ikm, sizeof ikm,
+			salt, sizeof salt, info, sizeof info, outlen, out);
 	mu_assert("wrong ret", 0 == ret);
 	mu_assert("wrong out", 0 == sodium_memcmp(out, okm, outlen));
 	return 0;
@@ -131,10 +129,8 @@ static char* test_vector_long_v3()
 	const size_t outlen = sizeof okm;
 	unsigned char out[outlen];
 
-	int ret = hkdf_init(3);
-	mu_assert("", 0 == ret);
-
-	ret = hkdf_derive_secrets(ikm, sizeof ikm, salt, sizeof salt, info, sizeof info, outlen, out);
+	int ret = hkdf_derive_secrets(HKDF_MESSAGE_V3, ikm, sizeof ikm,
+			salt, sizeof salt, info, sizeof info, outlen, out);
 	mu_assert("", 0 == ret);
 	mu_assert("", 0 == sodium_memcmp(out, okm, outlen));
 	return 0;
@@ -177,10 +173,8 @@ static char* test_vector_v2()
 	const size_t outlen = sizeof okm;
 	unsigned char out[outlen];
 
-	int ret = hkdf_init(2);
-	mu_assert("", 0 == ret);
-
-	ret = hkdf_derive_secrets(ikm, sizeof ikm, salt, sizeof salt, info, sizeof info, outlen, out);
+	int ret = hkdf_derive_secrets(HKDF_MESSAGE_V2, ikm, sizeof ikm,
+			salt, sizeof salt, info, sizeof info, outlen, out);
 	mu_assert("", 0 == ret);
 	mu_assert("", 0 == sodium_memcmp(out, okm, outlen));
 	return 0;
