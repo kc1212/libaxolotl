@@ -1,45 +1,78 @@
 
 #include <string.h>
-#include "curve.h"
 
-static const int DJB_TYPE = 0x05;
-static const int key_bytes_len = 32;
+#include "curve.h"
+#include "../common/axolotl_errors.h"
+
+#define KEY_BYTES_LEN crypto_sign_PUBLICKEYBYTES
+
+static const int CURVE_DJB_TYPE = 0x05;
 
 int curve_generate_keypair(struct curve_key_pair* pair)
 {
-	return crypto_sign_keypair(pair->pk, pair->sk);
+	pair->pk.type = CURVE_DJB_TYPE;
+	pair->sk.type = CURVE_DJB_TYPE;
+	return crypto_sign_keypair(pair->pk.bytes, pair->sk.bytes);
 }
 
 int curve_decode_point(const unsigned char* bytes, const int offset,
-		unsigned char* key_bytes)
+		struct curve_pk* pk)
 {
 	int type = bytes[offset] & 0xff;
 
-	if (type == DJB_TYPE) {
-		memcpy(key_bytes, bytes+offset+1, key_bytes_len);
+	if (type == CURVE_DJB_TYPE) {
+		sodium_memzero(pk->bytes, crypto_sign_PUBLICKEYBYTES);
+		pk->type = CURVE_DJB_TYPE;
+		memcpy(pk->bytes, bytes+offset+1, KEY_BYTES_LEN);
 		return 0;
 	}
-	return -1;
+	return AXOLOTL_INVALID_KEY;
 }
 
-int curve_decode_private_point()
+int curve_decode_private_point(const unsigned char* bytes, const size_t byteslen,
+		struct curve_sk* sk)
 {
+	if (byteslen > crypto_sign_SECRETKEYBYTES)
+		return -1;
+
+	sodium_memzero(sk->bytes, crypto_sign_SECRETKEYBYTES);
+	sk->type = CURVE_DJB_TYPE;
+	memcpy(sk->bytes, bytes, byteslen);
 	return 0;
 }
 
-int curve_calculate_agreement()
+// out should have length of crypto_scalarmult_BYTES
+int curve_calculate_agreement(const struct curve_pk* cpk, const struct curve_sk* csk,
+		unsigned char* out)
 {
-	return 0;
+	if (cpk->type != csk->type)
+		return AXOLOTL_INVALID_KEY;
+
+	if (cpk->type != CURVE_DJB_TYPE)
+		return AXOLOTL_INVALID_KEY;
+
+	return crypto_scalarmult(out, csk->bytes, cpk->bytes);
 }
 
-int curve_verify_signature()
+// return value of zero means ok
+int curve_verify_signature(const struct curve_pk* cpk, const unsigned char* msg,
+		const size_t msglen, const unsigned char* sig)
 {
-	return 0;
+	if (cpk->type != CURVE_DJB_TYPE)
+		return AXOLOTL_INVALID_KEY;
+
+	return crypto_sign_verify_detached(sig, msg, msglen, cpk->bytes);
 }
 
-int curve_calculate_signature()
+// max siglen is crypto_sign_BYTES
+int curve_calculate_signature(const struct curve_sk* csk, const unsigned char* msg,
+		const size_t msglen, unsigned char* sig, unsigned long long* siglen)
 {
-	return 0;
+	if (csk->type != CURVE_DJB_TYPE)
+		return AXOLOTL_INVALID_KEY;
+
+	return crypto_sign_detached(sig, siglen, msg, msglen, csk->bytes);
 }
+
 
 
