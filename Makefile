@@ -1,21 +1,21 @@
 
 CC=gcc
-CFLAGS=-g -O2 -W -Wall -Wextra -pedantic -std=c99
-CFLAGS32=-m32
+CFLAGS=-g -W -Wall -Wextra -pedantic -std=c99
 LDLIBS=-lsodium -lm
 
 SOURCES:=$(wildcard src/**/*.c src/*.c)
 HEADERS:=$(wildcard src/**/*.h src/*.h)
 OBJECTS:=$(patsubst %.c, build/%.o, $(notdir $(SOURCES)))
 
-REF10_SOURCES:=$(wildcard ref10/ed25519/**/.c ref10/ed25519/*.c)
-REF10_HEADERS:=$(wildcard ref10/ed25519/**/.h ref10/ed25519/*.h)
+REF10_SOURCES:=$(wildcard ref10/ed25519/additions/*.c ref10/ed25519/nacl_sha512/*.c ref10/ed25519/*.c)
+REF10_HEADERS:=$(wildcard ref10/ed25519/**/*.h ref10/ed25519/*.h)
 REF10_OBJECTS:=$(patsubst %.c, build/ref10/%.o, $(notdir $(REF10_SOURCES)))
-REF10_FLAGS:=-Iref10/ed25519/nacl_includes -Iref10/ed25519/additions -Ied25519
+REF10_FLAGS:=-Iref10/ed25519/nacl_includes -Iref10/ed25519/additions -Iref10/ed25519
 
-CURVE_SOURCE:=curve25519-donna/curve25519-donna.c
+# we need an option to set to 32 or 64
+CURVE_SOURCE:=curve25519-donna/curve25519-donna-c64.c
 CURVE_HEADER:=src/common/curve25519-donna.h
-CURVE_OBJECT:=build/curve25519-donna/curve25519-donna.o
+CURVE_OBJECT:=build/curve25519-donna/curve25519-donna-c64.o
 
 TEST_SOURCES:=$(wildcard tests/*.c)
 TEST_EXES:=$(basename $(patsubst %, build/%, $(TEST_SOURCES)))
@@ -26,9 +26,7 @@ vpath % src/ecc
 vpath % src/kdf
 vpath % ref10/ed25519
 vpath % ref10/ed25519/additions
-vpath % ref10/ed25519/nacl_includes
 vpath % ref10/ed25519/nacl_sha512
-vpath % curve25519-donna
 # vpath % ref10/ed25519/main
 vpath % tests
 
@@ -46,11 +44,18 @@ build/%.o: %.c $(HEADERS) $(REF10_OBJECTS) $(CURVE_OBJECT) | build
 build/ref10/%.o: ref10/ed25519/%.c $(REF10_HEADERS) | build
 	$(CC) -c $(CFLAGS) $(REF10_FLAGS) -o $@ $<
 
+build/ref10/%.o: ref10/ed25519/additions/%.c $(REF10_HEADERS) | build
+	$(CC) -c $(CFLAGS) $(REF10_FLAGS) -o $@ $<
+
+build/ref10/%.o: ref10/ed25519/nacl_sha512/%.c $(REF10_HEADERS) | build
+	$(CC) -c $(CFLAGS) $(REF10_FLAGS) -o $@ $<
+
 $(CURVE_OBJECT) : $(CURVE_SOURCE) $(CURVE_HEADER) | build
-	$(CC) -c $(CFLAGS) $(CFLAGS32) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 build/tests/%: tests/%.c $(TEST_HEADER) $(OBJECTS)
-	$(CC) $(CFLAGS) $(LDLIBS) -o $@ $< $(OBJECTS)
+	$(CC) $(CFLAGS) $(LDLIBS) $(REF10_FLAGS) -o $@ $< \
+		$(OBJECTS) $(REF10_OBJECTS) $(CURVE_OBJECT)
 
 build:
 	@mkdir -p build/tests

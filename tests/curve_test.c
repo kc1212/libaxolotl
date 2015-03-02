@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include <sodium.h>
+#include <sodium/utils.h>
 
 #include "minunit.h"
 #include "../src/ecc/curve.h"
@@ -9,8 +9,8 @@ int tests_run = 0;
 
 static char* test_key_bytes()
 {
-	mu_assert("", 32U == crypto_scalarmult_curve25519_BYTES);
-	mu_assert("", 32U == crypto_scalarmult_BYTES);
+	mu_assert("", 32U == CURVE_KEY_BYTES_LEN);
+	mu_assert("", 33U == CURVE_PUBLIC_SERIALIZED_LEN);
 	return 0;
 }
 
@@ -77,33 +77,34 @@ static char* test_agreement()
 	mu_assert("", 0 == curve_decode_point(bob_public, 0, &bob_pk));
 	mu_assert("", 0 == curve_decode_private_point(bob_private, sizeof bob_private, &bob_sk));
 
-	unsigned char shared_one[crypto_scalarmult_BYTES];
-	unsigned char shared_two[crypto_scalarmult_BYTES];
+	unsigned char shared_one[CURVE_KEY_BYTES_LEN];
+	unsigned char shared_two[CURVE_KEY_BYTES_LEN];
 
-	mu_assert("", sizeof shared == crypto_scalarmult_BYTES); // 32
+	mu_assert("", sizeof shared == CURVE_KEY_BYTES_LEN); // 32
 	mu_assert("", 0 == curve_calculate_agreement(&alice_pk, &bob_sk, shared_one));
 	mu_assert("", 0 == curve_calculate_agreement(&bob_pk, &alice_sk, shared_two));
 
-	mu_assert("", 0 == sodium_memcmp(shared, shared_one, crypto_scalarmult_BYTES));
-	mu_assert("", 0 == sodium_memcmp(shared, shared_two, crypto_scalarmult_BYTES));
+	mu_assert("", 0 == sodium_memcmp(shared, shared_one, CURVE_KEY_BYTES_LEN));
+	mu_assert("", 0 == sodium_memcmp(shared, shared_two, CURVE_KEY_BYTES_LEN));
 
 	return 0;
 }
 
 static char* test_random_agreement()
 {
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 500; i++) {
 		struct curve_key_pair alice_pair;
 		struct curve_key_pair bob_pair;
 		mu_assert("", 0 == curve_generate_keypair(&alice_pair));
 		mu_assert("", 0 == curve_generate_keypair(&bob_pair));
 
-		unsigned char shared_alice[crypto_scalarmult_BYTES];
-		unsigned char shared_bob[crypto_scalarmult_BYTES];
+		unsigned char shared_alice[CURVE_KEY_BYTES_LEN];
+		unsigned char shared_bob[CURVE_KEY_BYTES_LEN];
 		mu_assert("", 0 == curve_calculate_agreement(&bob_pair.pk, &alice_pair.sk, shared_alice));
 		mu_assert("", 0 == curve_calculate_agreement(&alice_pair.pk, &bob_pair.sk, shared_bob));
 
-		mu_assert("", sodium_memcmp(shared_alice, shared_bob, crypto_scalarmult_BYTES));
+		// TODO failure here...
+		mu_assert("", sodium_memcmp(shared_alice, shared_bob, CURVE_KEY_BYTES_LEN));
 	}
 	return 0;
 }
@@ -156,8 +157,8 @@ static char* test_signature()
 		0x60, 0xb8, 0x6e, 0x88
 	};
 
-	mu_assert("", CURVE_PUBLIC_SERIALIZEDLEN == sizeof alice_ephemeral_public);
-	mu_assert("", crypto_sign_BYTES == sizeof alice_sig);
+	mu_assert("", CURVE_PUBLIC_SERIALIZED_LEN == sizeof alice_ephemeral_public);
+	mu_assert("", CURVE_SIG_BYTES_LEN == sizeof alice_sig);
 
 	struct curve_sk alice_sk;
 	struct curve_pk alice_pk;
@@ -167,13 +168,22 @@ static char* test_signature()
 	mu_assert("", 0 == curve_decode_point(alice_identity_public, 0, &alice_pk));
 	mu_assert("", 0 == curve_decode_point(alice_ephemeral_public, 0, &alice_ek));
 
-	unsigned char msg[CURVE_PUBLIC_SERIALIZEDLEN];
+	unsigned char msg[CURVE_PUBLIC_SERIALIZED_LEN];
 	mu_assert("", 0 == curve_serialize_pk(&alice_ek, msg));
-	mu_assert("", 0 == sodium_memcmp(alice_ephemeral_public, msg, CURVE_PUBLIC_SERIALIZEDLEN));
+	mu_assert("", 0 == sodium_memcmp(alice_ephemeral_public, msg, CURVE_PUBLIC_SERIALIZED_LEN));
 	mu_assert("", 0 == curve_verify_signature(&alice_pk, msg, sizeof msg, alice_sig));
+
+	// validation should fail after modifying the signature
+	for (int i = 0; i < sizeof alice_sig; i++) {
+		unsigned char modified_sig[sizeof alice_sig];
+		memcpy(modified_sig, alice_sig, sizeof alice_sig);
+		modified_sig[i] ^= 0x01;
+		mu_assert("", !!curve_verify_signature(&alice_pk, msg, sizeof msg, modified_sig));
+	}
 
 	return 0;
 }
+
 
 static char* all_tests()
 {

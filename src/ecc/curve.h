@@ -2,21 +2,21 @@
 #ifndef _curve_h
 #define _curve_h
 
-#include <sodium.h>
-
-#define CURVE_PUBLIC_SERIALIZEDLEN (crypto_scalarmult_curve25519_BYTES + 1)
-#define CURVE_SECRET_SERIALIZEDLEN (crypto_scalarmult_curve25519_BYTES)
+#define CURVE_KEY_BYTES_LEN 32
+#define CURVE_SIG_BYTES_LEN 64
+#define CURVE_PUBLIC_SERIALIZED_LEN (CURVE_KEY_BYTES_LEN + 1)
+#define CURVE_SECRET_SERIALIZED_LEN (CURVE_KEY_BYTES_LEN)
 
 // we're using Curve25519 keys
 
 struct curve_pk {
 	int type;
-	unsigned char bytes[crypto_scalarmult_curve25519_BYTES];
+	unsigned char bytes[CURVE_KEY_BYTES_LEN];
 };
 
 struct curve_sk {
 	int type;
-	unsigned char bytes[crypto_scalarmult_curve25519_BYTES];
+	unsigned char bytes[CURVE_KEY_BYTES_LEN];
 };
 
 struct curve_key_pair {
@@ -34,7 +34,7 @@ int curve_calculate_agreement(const struct curve_pk* cpk, const struct curve_sk*
 int curve_verify_signature(const struct curve_pk* cpk, const unsigned char* msg,
 		const size_t msglen, const unsigned char* sig);
 int curve_calculate_signature(const struct curve_sk* csk, const unsigned char* msg,
-		const size_t msglen, unsigned char* sig, unsigned long long* siglen);
+		const size_t msglen, unsigned char* sig);
 int curve_serialize_pk(const struct curve_pk* pk, unsigned char* out);
 int curve_serialize_sk(const struct curve_sk* sk, unsigned char* out);
 

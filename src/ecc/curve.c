@@ -1,27 +1,19 @@
 
 #include <string.h>
+#include <sodium/randombytes.h>
 
 #include "curve.h"
+#include "../common/curve25519-donna.h"
 #include "../common/axolotl_errors.h"
-
-#define KEY_BYTES_LEN crypto_scalarmult_curve25519_BYTES
 
 static const int CURVE_DJB_TYPE = 0x05;
 
 int curve_generate_keypair(struct curve_key_pair* pair)
 {
-	unsigned char ed25519_pk[crypto_sign_ed25519_PUBLICKEYBYTES];
-	unsigned char ed25519_skpk[crypto_sign_ed25519_SECRETKEYBYTES];
-
-	crypto_sign_ed25519_keypair(ed25519_pk, ed25519_skpk);
-	crypto_sign_ed25519_pk_to_curve25519(pair->pk.bytes, ed25519_pk);
-	crypto_sign_ed25519_sk_to_curve25519(pair->sk.bytes, ed25519_skpk);
-
+	randombytes_buf(pair->sk.bytes, CURVE_KEY_BYTES_LEN);
+	curve25519_keygen(pair->pk.bytes, pair->sk.bytes);
 	pair->pk.type = CURVE_DJB_TYPE;
 	pair->sk.type = CURVE_DJB_TYPE;
-
-	sodium_memzero(ed25519_pk, crypto_sign_ed25519_PUBLICKEYBYTES);
-	sodium_memzero(ed25519_skpk, crypto_sign_ed25519_SECRETKEYBYTES);
 	return 0;
 }
 
@@ -31,9 +23,9 @@ int curve_decode_point(const unsigned char* bytes, const int offset,
 	int type = bytes[offset] & 0xff;
 
 	if (type == CURVE_DJB_TYPE) {
-		sodium_memzero(pk->bytes, crypto_scalarmult_curve25519_BYTES);
+		sodium_memzero(pk->bytes, CURVE_KEY_BYTES_LEN);
 		pk->type = CURVE_DJB_TYPE;
-		memcpy(pk->bytes, bytes+offset+1, KEY_BYTES_LEN);
+		memcpy(pk->bytes, bytes+offset+1, CURVE_KEY_BYTES_LEN);
 		return 0;
 	}
 	return AXOLOTL_INVALID_KEY;
@@ -43,16 +35,16 @@ int curve_decode_private_point(const unsigned char* bytes, const size_t byteslen
 		struct curve_sk* sk)
 {
 	// TODO  check for null
-	if (byteslen > crypto_scalarmult_curve25519_BYTES)
+	if (byteslen > CURVE_KEY_BYTES_LEN)
 		return AXOLOTL_INVALID_KEYLEN;
 
-	sodium_memzero(sk->bytes, crypto_scalarmult_curve25519_BYTES);
+	sodium_memzero(sk->bytes, CURVE_KEY_BYTES_LEN);
 	sk->type = CURVE_DJB_TYPE;
 	memcpy(sk->bytes, bytes, byteslen);
 	return 0;
 }
 
-// out should have length of crypto_scalarmult_BYTES
+// out should have length of CURVE_KEY_BYTES_LEN
 int curve_calculate_agreement(const struct curve_pk* cpk, const struct curve_sk* csk,
 		unsigned char* out)
 {
@@ -62,7 +54,7 @@ int curve_calculate_agreement(const struct curve_pk* cpk, const struct curve_sk*
 	if (cpk->type != CURVE_DJB_TYPE)
 		return AXOLOTL_INVALID_KEY;
 
-	return crypto_scalarmult_curve25519(out, csk->bytes, cpk->bytes);
+	return curve25519_donna(out, csk->bytes, cpk->bytes);
 }
 
 // return value of zero means ok
@@ -72,39 +64,40 @@ int curve_verify_signature(const struct curve_pk* cpk, const unsigned char* msg,
 	if (cpk->type != CURVE_DJB_TYPE)
 		return AXOLOTL_INVALID_KEY;
 
-	// TODO this functions uses Ed25519 keys, need to convert our keys
-	return crypto_sign_verify_detached(sig, msg, msglen, cpk->bytes);
+	return curve25519_verify(sig, cpk->bytes, msg, msglen);
 }
 
-// max siglen is crypto_sign_BYTES
+// max siglen is CURVE_KEY_BYTES_LEN
 int curve_calculate_signature(const struct curve_sk* csk, const unsigned char* msg,
-		const size_t msglen, unsigned char* sig, unsigned long long* siglen)
+		const size_t msglen, unsigned char* sig)
 {
 	if (csk->type != CURVE_DJB_TYPE)
 		return AXOLOTL_INVALID_KEY;
 
 	// TODO this functions uses Ed25519 keys, need to convert our keys
-	return crypto_sign_detached(sig, siglen, msg, msglen, csk->bytes);
+	unsigned char random[64];
+	randombytes_buf(random, sizeof random);
+	return curve25519_sign(sig, csk->bytes, msg, msglen, random);
 }
 
-// out must have at least length of 33, or crypto_scalarmult_curve25519_BYTES + 1
+// out must have at least length of 33, or CURVE_KEY_BYTES_LEN + 1
 int curve_serialize_pk(const struct curve_pk* pk, unsigned char* out)
 {
 	if (pk == NULL || out == NULL)
 		return AXOLOTL_NULL_POINTER;
 
 	out[0] = (unsigned char) pk->type;
-	memcpy(out+1, pk->bytes, crypto_scalarmult_curve25519_BYTES);
+	memcpy(out+1, pk->bytes, CURVE_KEY_BYTES_LEN);
 	return 0;
 }
 
-// out must have at least length of 64 or crypto_scalarmult_curve25519_BYTES
+// out must have at least CURVE_KEY_BYTES_LEN
 int curve_serialize_sk(const struct curve_sk* sk, unsigned char* out)
 {
 	if (sk == NULL || out == NULL)
 		return AXOLOTL_NULL_POINTER;
 
-	memcpy(out, sk->bytes, crypto_scalarmult_curve25519_BYTES);
+	memcpy(out, sk->bytes, CURVE_KEY_BYTES_LEN);
 	return 0;
 }
 
