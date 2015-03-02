@@ -18,10 +18,8 @@
 		if (message) \
 			return message; \
 		else { \
-			printf(#test); \
-			for (size_t i = 0; i < 30 - strlen(#test); i++) \
-				printf("."); \
-			printf("PASSED\n"); \
+			printf("ok> "); \
+			printf(#test"\n"); \
 		} \
 	} while (0)
 

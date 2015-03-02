@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <sodium/utils.h>
+#include <sodium/randombytes.h>
 
 #include "minunit.h"
 #include "../src/curve.h"
@@ -101,9 +102,8 @@ static char* test_random_agreement()
 
 		unsigned char shared_alice[CURVE_KEY_BYTES_LEN];
 		unsigned char shared_bob[CURVE_KEY_BYTES_LEN];
-		mu_assert("", 0 == curve_calculate_agreement(&bob_pair.pk, &alice_pair.sk, shared_alice));
 		mu_assert("", 0 == curve_calculate_agreement(&alice_pair.pk, &bob_pair.sk, shared_bob));
-
+		mu_assert("", 0 == curve_calculate_agreement(&bob_pair.pk, &alice_pair.sk, shared_alice));
 		mu_assert("", 0 == sodium_memcmp(shared_alice, shared_bob, CURVE_KEY_BYTES_LEN));
 	}
 	return 0;
@@ -184,6 +184,21 @@ static char* test_signature()
 	return 0;
 }
 
+static char* test_random_verification()
+{
+	for (int i = 0; i < 500; i++) {
+		struct curve_key_pair alice_pair;
+		const size_t mlen = 128;
+		unsigned char m[mlen];
+		unsigned char sig[CURVE_SIG_BYTES_LEN];
+
+		randombytes_buf(m, mlen);
+		mu_assert("", 0 == curve_generate_keypair(&alice_pair));
+		mu_assert("", 0 == curve_calculate_signature(&alice_pair.sk, m, mlen, sig));
+		mu_assert("", 0 == curve_verify_signature(&alice_pair.pk, m, mlen, sig));
+	}
+	return 0;
+}
 
 static char* all_tests()
 {
@@ -191,6 +206,7 @@ static char* all_tests()
 	mu_run_test(test_agreement);
 	mu_run_test(test_random_agreement);
 	mu_run_test(test_signature);
+	mu_run_test(test_random_verification);
 	return 0;
 }
 

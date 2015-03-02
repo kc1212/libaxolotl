@@ -87,7 +87,6 @@ int curve_calculate_signature(const struct curve_sk* csk, const unsigned char* m
 	if (csk->type != CURVE_DJB_TYPE)
 		return AXOLOTL_INVALID_KEY;
 
-	// TODO this functions uses Ed25519 keys, need to convert our keys
 	unsigned char random[64];
 	randombytes_buf(random, sizeof random);
 	return curve25519_sign(sig, csk->bytes, msg, msglen, random);
