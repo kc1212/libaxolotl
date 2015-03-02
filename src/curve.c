@@ -10,10 +10,23 @@ static const int CURVE_DJB_TYPE = 0x05;
 
 int curve_generate_keypair(struct curve_key_pair* pair)
 {
+	if (pair == NULL)
+		return AXOLOTL_NULL_POINTER;
+
 	randombytes_buf(pair->sk.bytes, CURVE_KEY_BYTES_LEN);
+	pair->sk.bytes[0] &= 248;
+	pair->sk.bytes[31] &= 127;
+	pair->sk.bytes[31] |= 64;
+
 	curve25519_keygen(pair->pk.bytes, pair->sk.bytes);
+
+	/* we could also use curve25519_donna: */
+	// const unsigned char basepoint[CURVE_KEY_BYTES_LEN] = {9};
+	// curve25519_donna(pair->pk.bytes, pair->sk.bytes, basepoint);
+
 	pair->pk.type = CURVE_DJB_TYPE;
 	pair->sk.type = CURVE_DJB_TYPE;
+
 	return 0;
 }
 

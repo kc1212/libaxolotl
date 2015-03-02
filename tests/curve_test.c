@@ -4,6 +4,7 @@
 
 #include "minunit.h"
 #include "../src/curve.h"
+#include "../src/utils.h"
 
 int tests_run = 0;
 
@@ -103,8 +104,7 @@ static char* test_random_agreement()
 		mu_assert("", 0 == curve_calculate_agreement(&bob_pair.pk, &alice_pair.sk, shared_alice));
 		mu_assert("", 0 == curve_calculate_agreement(&alice_pair.pk, &bob_pair.sk, shared_bob));
 
-		// TODO failure here...
-		mu_assert("", sodium_memcmp(shared_alice, shared_bob, CURVE_KEY_BYTES_LEN));
+		mu_assert("", 0 == sodium_memcmp(shared_alice, shared_bob, CURVE_KEY_BYTES_LEN));
 	}
 	return 0;
 }
