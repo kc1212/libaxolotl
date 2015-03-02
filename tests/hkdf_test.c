@@ -5,7 +5,7 @@
 #include <sodium.h>
 
 #include "minunit.h"
-#include "../src/kdf/hkdf.h"
+#include "../src/hkdf.h"
 
 static char* test_vector_v3()
 {

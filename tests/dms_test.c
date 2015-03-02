@@ -3,7 +3,7 @@
 #include <sodium.h>
 
 #include "minunit.h"
-#include "../src/kdf/derived_message_secrets.h"
+#include "../src/derived_message_secrets.h"
 
 static char* test_dms()
 {

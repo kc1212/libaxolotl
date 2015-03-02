@@ -3,7 +3,7 @@
 #include <sodium.h>
 
 #include "minunit.h"
-#include "../src/kdf/derived_root_secrets.h"
+#include "../src/derived_root_secrets.h"
 
 static char* test_drs()
 {

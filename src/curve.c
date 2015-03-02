@@ -3,8 +3,8 @@
 #include <sodium/randombytes.h>
 
 #include "curve.h"
-#include "../common/curve25519-donna.h"
-#include "../common/axolotl_errors.h"
+#include "curve25519-donna.h"
+#include "common.h"
 
 static const int CURVE_DJB_TYPE = 0x05;
 

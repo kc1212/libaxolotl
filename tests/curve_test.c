@@ -3,7 +3,7 @@
 #include <sodium/utils.h>
 
 #include "minunit.h"
-#include "../src/ecc/curve.h"
+#include "../src/curve.h"
 
 int tests_run = 0;
 

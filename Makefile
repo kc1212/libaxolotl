@@ -3,8 +3,8 @@ CC=gcc
 CFLAGS=-g -W -Wall -Wextra -pedantic -std=c99
 LDLIBS=-lsodium -lm
 
-SOURCES:=$(wildcard src/**/*.c src/*.c)
-HEADERS:=$(wildcard src/**/*.h src/*.h)
+SOURCES:=$(wildcard src/*.c)
+HEADERS:=$(wildcard src/*.h)
 OBJECTS:=$(patsubst %.c, build/%.o, $(notdir $(SOURCES)))
 
 REF10_SOURCES:=$(wildcard ref10/ed25519/additions/*.c ref10/ed25519/nacl_sha512/*.c ref10/ed25519/*.c)
@@ -14,7 +14,7 @@ REF10_FLAGS:=-Iref10/ed25519/nacl_includes -Iref10/ed25519/additions -Iref10/ed2
 
 # we need an option to set to 32 or 64
 CURVE_SOURCE:=curve25519-donna/curve25519-donna-c64.c
-CURVE_HEADER:=src/common/curve25519-donna.h
+CURVE_HEADER:=src/curve25519-donna.h
 CURVE_OBJECT:=build/curve25519-donna/curve25519-donna-c64.o
 
 TEST_SOURCES:=$(wildcard tests/*.c)
@@ -22,8 +22,6 @@ TEST_EXES:=$(basename $(patsubst %, build/%, $(TEST_SOURCES)))
 TEST_HEADER:=tests/minunit.h
 
 vpath % src
-vpath % src/ecc
-vpath % src/kdf
 vpath % ref10/ed25519
 vpath % ref10/ed25519/additions
 vpath % ref10/ed25519/nacl_sha512
@@ -38,7 +36,7 @@ curve: $(CURVE_OBJECT)
 test: $(TEST_EXES)
 	./run_all_tests.sh
 
-build/%.o: %.c $(HEADERS) $(REF10_OBJECTS) $(CURVE_OBJECT) | build
+build/%.o: src/%.c $(HEADERS) $(REF10_OBJECTS) $(CURVE_OBJECT) | build
 	$(CC) -c $(CFLAGS) $(REF10_FLAGS) -o $@ $<
 
 build/ref10/%.o: ref10/ed25519/%.c $(REF10_HEADERS) | build

@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #include "hkdf.h"
-#include "../common/common.h"
+#include "common.h"
 
 static const int HASH_OUTSZ = 32;
 
