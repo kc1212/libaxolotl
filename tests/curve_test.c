@@ -5,7 +5,6 @@
 
 #include "minunit.h"
 #include "../src/curve.h"
-#include "../src/utils.h"
 
 int tests_run = 0;
 

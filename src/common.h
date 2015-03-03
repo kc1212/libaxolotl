@@ -1,4 +1,7 @@
 
+#ifndef _common_h
+#define _common_h
+
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -9,6 +12,8 @@
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
+#define COMMON_KEY_LEN 32
+
 // positive because to distinguish between libsodium (it returns -1)
 enum AXOLOTL_RETURN_CODES {
 	AXOLOTL_SUCCESS = 0,
@@ -18,5 +23,7 @@ enum AXOLOTL_RETURN_CODES {
 	AXOLOTL_CRITICAL_ERROR,
 	AXOLOTL_TOTAL
 };
+
+#endif
 
 
