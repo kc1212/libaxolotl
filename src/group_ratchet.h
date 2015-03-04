@@ -14,20 +14,18 @@ struct gr_sender_chain_key {
 	unsigned char key[COMMON_KEY_LEN];
 };
 
-int gr_sender_message_key_init(const int iteration, const unsigned char* seed,
-		const size_t seedlen, struct gr_sender_message_key* senderkey);
+int gr_sender_message_key_init(struct gr_sender_message_key* msgkey,
+		const int iteration, const unsigned char* seed, const size_t seedlen);
 
 
-int gr_sender_chain_key_init(const int iteration, const unsigned char* key,
-		struct gr_sender_chain_key* chainkey);
+int gr_sender_chain_key_init(struct gr_sender_chain_key* chainkey,
+		const int iteration, const unsigned char* key);
 
-int gr_sender_chain_key_derive(const unsigned char* seed, const size_t seedlen,
-		const unsigned char* key, unsigned char* newkey);
+int gr_sender_chain_key_derive(unsigned char* newkey, const unsigned char* seed,
+		const size_t seedlen, const unsigned char* key);
 
-int gr_sender_chain_key_next(const struct gr_sender_chain_key* old,
-		struct gr_sender_chain_key* new);
+int gr_sender_chain_key_next(struct gr_sender_chain_key* new,
+		const struct gr_sender_chain_key* old);
 
-int gr_sender_chain_key_msgkey(const struct gr_sender_chain_key* chainkey,
-	struct gr_sender_message_key* msgkey);
-
-
+int gr_sender_chain_key_msgkey(struct gr_sender_message_key* msgkey,
+		const struct gr_sender_chain_key* chainkey);

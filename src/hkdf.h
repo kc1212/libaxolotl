@@ -7,15 +7,16 @@ enum hkdf_msg_ver_t {
 	HKDF_MESSAGE_V3 = 1
 };
 
-int hkdf_derive_secrets_zerosalt(enum hkdf_msg_ver_t offset,
+int hkdf_derive_secrets_zerosalt(unsigned char* out, enum hkdf_msg_ver_t offset,
 		const unsigned char* in, const size_t inlen,
 		const unsigned char* info, const size_t infolen,
-		const unsigned outlen, unsigned char* out);
+		const unsigned outlen);
 
-int hkdf_derive_secrets(enum hkdf_msg_ver_t offset,
+int hkdf_derive_secrets(unsigned char* out, enum hkdf_msg_ver_t offset,
 		const unsigned char* in, const size_t inlen,
 		const unsigned char* salt, const size_t saltlen,
 		const unsigned char* info, const size_t infolen,
-		const unsigned outlen, unsigned char* out);
-
+		const unsigned outlen);
 #endif
+
+

@@ -173,7 +173,7 @@ static char* test_signature()
 	mu_assert("", 0 == curve_verify_signature(alice_sig, &alice_pk, msg, sizeof msg));
 
 	// validation should fail after modifying the signature
-	for (int i = 0; i < sizeof alice_sig; i++) {
+	for (unsigned i = 0; i < sizeof alice_sig; i++) {
 		unsigned char modified_sig[sizeof alice_sig];
 		memcpy(modified_sig, alice_sig, sizeof alice_sig);
 		modified_sig[i] ^= 0x01;

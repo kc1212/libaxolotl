@@ -23,7 +23,7 @@ vpath % ref10/ed25519/nacl_sha512
 # vpath % ref10/ed25519/main
 vpath % tests
 
-.PHONY: all test clean build
+.PHONY: all test clean build ref10
 
 all: $(OBJECTS)
 ref10: $(REF10_OBJECTS)

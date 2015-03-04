@@ -9,37 +9,37 @@
 
 static const int HASH_OUTSZ = 32;
 
-static int hkdf_extract(const unsigned char* salt, const size_t saltlen,
-		const unsigned char* in, const size_t inlen, unsigned char* out);
+static int hkdf_extract(unsigned char* out, const unsigned char* salt,
+		const size_t saltlen, const unsigned char* in, const size_t inlen);
 
-static int hkdf_expand(enum hkdf_msg_ver_t offset,
+static int hkdf_expand(unsigned char* out, enum hkdf_msg_ver_t offset,
 		const unsigned char* prk, const size_t prklen,
 		const unsigned char* info, const size_t infolen,
-		const unsigned outlen, unsigned char* out);
+		const unsigned outlen);
 
-int hkdf_derive_secrets_zerosalt(enum hkdf_msg_ver_t offset,
+int hkdf_derive_secrets_zerosalt(unsigned char* out, enum hkdf_msg_ver_t offset,
 		const unsigned char* in, const size_t inlen,
 		const unsigned char* info, const size_t infolen,
-		const unsigned outlen, unsigned char* out)
+		const unsigned outlen)
 {
 	unsigned char salt[HASH_OUTSZ];
 	sodium_memzero(salt, sizeof salt);
-	return hkdf_derive_secrets(offset, in, inlen, salt, sizeof salt, info, infolen, outlen, out);
+	return hkdf_derive_secrets(out, offset, in, inlen, salt, sizeof salt, info, infolen, outlen);
 }
 
-int hkdf_derive_secrets(enum hkdf_msg_ver_t offset,
+int hkdf_derive_secrets(unsigned char* out, enum hkdf_msg_ver_t offset,
 		const unsigned char* in, const size_t inlen,
 		const unsigned char* salt, const size_t saltlen,
 		const unsigned char* info, const size_t infolen,
-		const unsigned outlen, unsigned char* out)
+		const unsigned outlen)
 {
 	unsigned char prk[crypto_auth_hmacsha256_BYTES];
-	hkdf_extract(salt, saltlen, in, inlen, prk);
-	return hkdf_expand(offset, prk, sizeof prk, info, infolen, outlen, out);
+	hkdf_extract(prk, salt, saltlen, in, inlen);
+	return hkdf_expand(out, offset, prk, sizeof prk, info, infolen, outlen);
 }
 
-static int hkdf_extract(const unsigned char* salt, const size_t saltlen,
-		const unsigned char* in, const size_t inlen, unsigned char* out)
+static int hkdf_extract(unsigned char* out, const unsigned char* salt, const size_t saltlen,
+		const unsigned char* in, const size_t inlen)
 {
 	crypto_auth_hmacsha256_state state;
 	crypto_auth_hmacsha256_init(&state, salt, saltlen);
@@ -47,10 +47,10 @@ static int hkdf_extract(const unsigned char* salt, const size_t saltlen,
 	return crypto_auth_hmacsha256_final(&state, out);
 }
 
-static int hkdf_expand(enum hkdf_msg_ver_t offset,
+static int hkdf_expand(unsigned char* out, enum hkdf_msg_ver_t offset,
 		const unsigned char* prk, const size_t prklen,
 		const unsigned char* info, const size_t infolen,
-		const unsigned outlen, unsigned char* out)
+		const unsigned outlen)
 {
 	unsigned iters = (unsigned) ceil( (double)outlen / (double)HASH_OUTSZ );
 	unsigned char mixin[crypto_auth_hmacsha256_BYTES];
