@@ -1,9 +1,8 @@
 
 #include <string.h>
-#include <sodium/randombytes.h>
+#include <sodium.h>
 
 #include "curve.h"
-#include "curve25519-donna.h"
 #include "common.h"
 
 static const int CURVE_DJB_TYPE = 0x05;
@@ -18,11 +17,8 @@ int curve_generate_keypair(struct curve_key_pair* pair)
 	pair->sk.bytes[31] &= 127;
 	pair->sk.bytes[31] |= 64;
 
-	curve25519_keygen(pair->pk.bytes, pair->sk.bytes);
-
-	/* we could also use curve25519_donna: */
-	// const unsigned char basepoint[CURVE_KEY_BYTES_LEN] = {9};
-	// curve25519_donna(pair->pk.bytes, pair->sk.bytes, basepoint);
+	const unsigned char basepoint[CURVE_KEY_BYTES_LEN] = {9};
+	crypto_scalarmult_curve25519(pair->pk.bytes, pair->sk.bytes, basepoint);
 
 	pair->pk.type = CURVE_DJB_TYPE;
 	pair->sk.type = CURVE_DJB_TYPE;
@@ -67,7 +63,7 @@ int curve_calculate_agreement(const struct curve_pk* cpk, const struct curve_sk*
 	if (cpk->type != CURVE_DJB_TYPE)
 		return AXOLOTL_INVALID_KEY;
 
-	return curve25519_donna(out, csk->bytes, cpk->bytes);
+	return crypto_scalarmult_curve25519(out, csk->bytes, cpk->bytes);
 }
 
 // return value of zero means ok
