@@ -30,7 +30,7 @@ ref10: $(REF10_OBJECTS)
 test: $(TEST_EXES)
 	./run_all_tests.sh
 
-build/%.o: src/%.c $(HEADERS) $(REF10_OBJECTS) $(CURVE_OBJECT) | build
+build/%.o: src/%.c $(HEADERS) $(REF10_OBJECTS) | build
 	$(CC) -c $(CFLAGS) $(REF10_FLAGS) -o $@ $<
 
 build/ref10/%.o: ref10/ed25519/%.c $(REF10_HEADERS) | build
@@ -43,8 +43,7 @@ build/ref10/%.o: ref10/ed25519/nacl_sha512/%.c $(REF10_HEADERS) | build
 	$(CC) -c $(CFLAGS) $(REF10_FLAGS) -o $@ $<
 
 build/tests/%: tests/%.c $(TEST_HEADER) $(OBJECTS)
-	$(CC) $(CFLAGS) $(LDLIBS) $(REF10_FLAGS) -o $@ $< \
-		$(OBJECTS) $(REF10_OBJECTS) $(CURVE_OBJECT)
+	$(CC) $(CFLAGS) $(LDLIBS) $(REF10_FLAGS) -o $@ $< $(OBJECTS) $(REF10_OBJECTS)
 
 build:
 	@mkdir -p build/tests

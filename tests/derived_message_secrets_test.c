@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include <sodium.h>
+#include <string.h>
 
 #include "minunit.h"
 #include "../src/derived_message_secrets.h"
@@ -8,6 +8,7 @@
 static char* test_dms()
 {
 	struct dms_data dms;
+	memset(&dms, 0, sizeof dms);
 
 	mu_assert("", DMS_SIZE == DMS_CIPHER_KEY_LEN + DMS_MAC_KEY_LEN + DMS_IV_LEN);
 
@@ -16,10 +17,10 @@ static char* test_dms()
 		in[i] = i;
 	}
 
-	dms_init(in, &dms);
-	mu_assert("", 0 == sodium_memcmp(dms.cipher_key, in, DMS_CIPHER_KEY_LEN));
-	mu_assert("", 0 == sodium_memcmp(dms.mac_key, in + DMS_CIPHER_KEY_LEN, DMS_MAC_KEY_LEN));
-	mu_assert("", 0 == sodium_memcmp(dms.iv, in + DMS_CIPHER_KEY_LEN + DMS_MAC_KEY_LEN, DMS_IV_LEN));
+	dms_init(&dms, in);
+	mu_assert("", 0 == memcmp(dms.cipher_key, in, DMS_CIPHER_KEY_LEN));
+	mu_assert("", 0 == memcmp(dms.mac_key, in + DMS_CIPHER_KEY_LEN, DMS_MAC_KEY_LEN));
+	mu_assert("", 0 == memcmp(dms.iv, in + DMS_CIPHER_KEY_LEN + DMS_MAC_KEY_LEN, DMS_IV_LEN));
 
 	return 0;
 }

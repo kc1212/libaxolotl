@@ -2,7 +2,7 @@
 #include <string.h>
 #include "derived_message_secrets.h"
 
-int dms_init(unsigned char* in, struct dms_data* dms)
+int dms_init(struct dms_data* dms, const unsigned char* in)
 {
 	if (dms == NULL)
 		return -1;

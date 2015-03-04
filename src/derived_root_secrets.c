@@ -3,7 +3,7 @@
 
 #include "derived_root_secrets.h"
 
-int drs_init(unsigned char* in, struct drs_data* drs)
+int drs_init(struct drs_data* drs, const unsigned char* in)
 {
 	if (drs == NULL)
 		return -1;

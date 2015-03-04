@@ -9,7 +9,7 @@ struct drs_data {
 	unsigned char chain_key[32];
 };
 
-int drs_init(unsigned char* in, struct drs_data* drs);
+int drs_init(struct drs_data* drs, const unsigned char* in);
 
 #endif
 

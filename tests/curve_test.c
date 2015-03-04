@@ -72,18 +72,18 @@ static char* test_agreement()
 	struct curve_pk bob_pk;
 	struct curve_sk bob_sk;
 
-	mu_assert("", 0 == curve_decode_point(alice_public, 0, &alice_pk));
-	mu_assert("", 0 == curve_decode_private_point(alice_private, sizeof alice_private, &alice_sk));
+	mu_assert("", 0 == curve_decode_point(&alice_pk, alice_public, 0));
+	mu_assert("", 0 == curve_decode_private_point(&alice_sk, alice_private, sizeof alice_private));
 
-	mu_assert("", 0 == curve_decode_point(bob_public, 0, &bob_pk));
-	mu_assert("", 0 == curve_decode_private_point(bob_private, sizeof bob_private, &bob_sk));
+	mu_assert("", 0 == curve_decode_point(&bob_pk, bob_public, 0));
+	mu_assert("", 0 == curve_decode_private_point(&bob_sk, bob_private, sizeof bob_private));
 
 	unsigned char shared_one[CURVE_KEY_BYTES_LEN];
 	unsigned char shared_two[CURVE_KEY_BYTES_LEN];
 
 	mu_assert("", sizeof shared == CURVE_KEY_BYTES_LEN); // 32
-	mu_assert("", 0 == curve_calculate_agreement(&alice_pk, &bob_sk, shared_one));
-	mu_assert("", 0 == curve_calculate_agreement(&bob_pk, &alice_sk, shared_two));
+	mu_assert("", 0 == curve_calculate_agreement(shared_one, &alice_pk, &bob_sk));
+	mu_assert("", 0 == curve_calculate_agreement(shared_two, &bob_pk, &alice_sk));
 
 	mu_assert("", 0 == sodium_memcmp(shared, shared_one, CURVE_KEY_BYTES_LEN));
 	mu_assert("", 0 == sodium_memcmp(shared, shared_two, CURVE_KEY_BYTES_LEN));
@@ -101,8 +101,8 @@ static char* test_random_agreement()
 
 		unsigned char shared_alice[CURVE_KEY_BYTES_LEN];
 		unsigned char shared_bob[CURVE_KEY_BYTES_LEN];
-		mu_assert("", 0 == curve_calculate_agreement(&alice_pair.pk, &bob_pair.sk, shared_bob));
-		mu_assert("", 0 == curve_calculate_agreement(&bob_pair.pk, &alice_pair.sk, shared_alice));
+		mu_assert("", 0 == curve_calculate_agreement(shared_bob, &alice_pair.pk, &bob_pair.sk));
+		mu_assert("", 0 == curve_calculate_agreement(shared_alice, &bob_pair.pk, &alice_pair.sk));
 		mu_assert("", 0 == sodium_memcmp(shared_alice, shared_bob, CURVE_KEY_BYTES_LEN));
 	}
 	return 0;
@@ -163,21 +163,21 @@ static char* test_signature()
 	struct curve_pk alice_pk;
 	struct curve_pk alice_ek; // ephemeral key
 
-	mu_assert("", 0 == curve_decode_private_point(alice_identity_private, sizeof alice_identity_private, &alice_sk));
-	mu_assert("", 0 == curve_decode_point(alice_identity_public, 0, &alice_pk));
-	mu_assert("", 0 == curve_decode_point(alice_ephemeral_public, 0, &alice_ek));
+	mu_assert("", 0 == curve_decode_private_point(&alice_sk, alice_identity_private, sizeof alice_identity_private));
+	mu_assert("", 0 == curve_decode_point(&alice_pk, alice_identity_public, 0));
+	mu_assert("", 0 == curve_decode_point(&alice_ek, alice_ephemeral_public, 0));
 
 	unsigned char msg[CURVE_PUBLIC_SERIALIZED_LEN];
-	mu_assert("", 0 == curve_serialize_pk(&alice_ek, msg));
+	mu_assert("", 0 == curve_serialize_pk(msg, &alice_ek));
 	mu_assert("", 0 == sodium_memcmp(alice_ephemeral_public, msg, CURVE_PUBLIC_SERIALIZED_LEN));
-	mu_assert("", 0 == curve_verify_signature(&alice_pk, msg, sizeof msg, alice_sig));
+	mu_assert("", 0 == curve_verify_signature(alice_sig, &alice_pk, msg, sizeof msg));
 
 	// validation should fail after modifying the signature
 	for (int i = 0; i < sizeof alice_sig; i++) {
 		unsigned char modified_sig[sizeof alice_sig];
 		memcpy(modified_sig, alice_sig, sizeof alice_sig);
 		modified_sig[i] ^= 0x01;
-		mu_assert("", !!curve_verify_signature(&alice_pk, msg, sizeof msg, modified_sig));
+		mu_assert("", !!curve_verify_signature(modified_sig, &alice_pk, msg, sizeof msg));
 	}
 
 	return 0;
@@ -193,8 +193,8 @@ static char* test_random_verification()
 
 		randombytes_buf(m, mlen);
 		mu_assert("", 0 == curve_generate_keypair(&alice_pair));
-		mu_assert("", 0 == curve_calculate_signature(&alice_pair.sk, m, mlen, sig));
-		mu_assert("", 0 == curve_verify_signature(&alice_pair.pk, m, mlen, sig));
+		mu_assert("", 0 == curve_calculate_signature(sig, &alice_pair.sk, m, mlen));
+		mu_assert("", 0 == curve_verify_signature(sig, &alice_pair.pk, m, mlen));
 	}
 	return 0;
 }

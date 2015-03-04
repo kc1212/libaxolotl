@@ -2,6 +2,7 @@
 #ifndef _common_h
 #define _common_h
 
+// braced-group within expression should be supported by gcc and clang
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
