@@ -3,14 +3,32 @@
 #define _ratchet_keys_h
 
 #include "common.h"
+#include "hkdf.h"
 
-struct ratchet_message_key {
+struct ratchet_msgkey {
 	unsigned char cipher_key[COMMON_KEY_LEN];
 	unsigned char mac_key[COMMON_KEY_LEN];
-	unsigned char iv[32];
+	unsigned char iv[COMMON_IV_LEN];
 	int counter;
 };
 
+struct ratchet_chainkey {
+	unsigned char key[COMMON_KEY_LEN];
+	enum hkdf_msg_ver_t hkdf;
+	int index;
+};
+
+int ratchet_msgkey_init(struct ratchet_msgkey* out,
+		const unsigned char* cipher_key, const unsigned char* mac_key,
+		const unsigned char* iv, const int counter);
+
+int ratchet_chainkey_init(struct ratchet_chainkey* out,
+		const enum hkdf_msg_ver_t hkdf, const unsigned char* key, const int index);
+
+int ratchet_chainkey_getnext(struct ratchet_chainkey* new, const struct ratchet_chainkey* old);
+
+int ratchet_chainkey_getmsgkey(struct ratchet_msgkey* msgkey,
+		const struct ratchet_chainkey* chainkey);
 #endif
 
 

@@ -14,6 +14,7 @@
      _a < _b ? _a : _b; })
 
 #define COMMON_KEY_LEN 32
+#define COMMON_IV_LEN 32
 
 // positive because to distinguish between libsodium (it returns -1)
 enum AXOLOTL_RETURN_CODES {
