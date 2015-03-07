@@ -20,7 +20,7 @@ int gr_sender_message_key_init(struct gr_sender_message_key* msgkey,
 	if (seedlen > GR_SEED_LEN)
 		return AXOLOTL_INVALID_KEYLEN;
 
-	int ret = hkdf_derive_secrets_zerosalt(derivative, HKDF_MESSAGE_V3, seed, seedlen,
+	int ret = hkdf_derive_secrets_nosalt(derivative, HKDF_MESSAGE_V3, seed, seedlen,
 			info, sizeof info, derivativelen);
 	if (ret != AXOLOTL_SUCCESS)
 		return AXOLOTL_CRITICAL_ERROR;

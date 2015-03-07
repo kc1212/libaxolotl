@@ -55,15 +55,23 @@ int ratchet_chainkey_getmsgkey(struct ratchet_msgkey* msgkey,
 	unsigned char key_material_bytes[DERIVED_MSG_SECRETS_SIZE];
 	const unsigned char info[] = "WhisperMessageKeys";
 	struct derived_msg_secrets key_material;
+	int ret = AXOLOTL_SUCCESS;
 
-	ratchet_get_base_material(input_key_material, chainkey,
+	ret = ratchet_get_base_material(input_key_material, chainkey,
 			MESSAGE_KEY_SEED, sizeof MESSAGE_KEY_SEED);
+	if (ret != AXOLOTL_SUCCESS)
+		return ret;
 
-	hkdf_derive_secrets_zerosalt(key_material_bytes, chainkey->hkdf,
+	// size of info - 1 because we don't need null at the end
+	ret = hkdf_derive_secrets_nosalt(key_material_bytes, chainkey->hkdf,
 			input_key_material, sizeof input_key_material,
-			info, sizeof info, DERIVED_MSG_SECRETS_SIZE);
+			info, sizeof info - 1, DERIVED_MSG_SECRETS_SIZE);
+	if (ret != AXOLOTL_SUCCESS)
+		return ret;
 
-	derived_msg_secrets_init(&key_material, key_material_bytes);
+	ret = derived_msg_secrets_init(&key_material, key_material_bytes);
+	if (ret != AXOLOTL_SUCCESS)
+		return ret;
 
 	return ratchet_msgkey_init(msgkey, key_material.cipher_key,
 			key_material.mac_key, key_material.iv, chainkey->index);
