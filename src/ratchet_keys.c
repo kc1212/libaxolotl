@@ -18,9 +18,6 @@ int ratchet_msgkey_init(struct ratchet_msgkey* out,
 		const unsigned char* cipher_key, const unsigned char* mac_key,
 		const unsigned char* iv, const int counter)
 {
-	if (out == NULL)
-		return AXOLOTL_NULL_POINTER;
-
 	sodium_memzero(out, sizeof(struct ratchet_msgkey));
 	memcpy(out->cipher_key, cipher_key, COMMON_KEY_LEN);
 	memcpy(out->mac_key, mac_key, COMMON_KEY_LEN);
@@ -33,9 +30,6 @@ int ratchet_msgkey_init(struct ratchet_msgkey* out,
 int ratchet_chainkey_init(struct ratchet_chainkey* out,
 		const enum hkdf_msg_ver_t hkdf, const unsigned char* key, const int index)
 {
-	if (out == NULL)
-		return AXOLOTL_NULL_POINTER;
-
 	sodium_memzero(out, sizeof(struct ratchet_chainkey));
 	memcpy(out->key, key, COMMON_KEY_LEN);
 	out->hkdf = hkdf;
@@ -46,6 +40,7 @@ int ratchet_chainkey_init(struct ratchet_chainkey* out,
 int ratchet_chainkey_getnext(struct ratchet_chainkey* new, const struct ratchet_chainkey* old)
 {
 	unsigned char next_key[crypto_auth_hmacsha256_BYTES];
+	ratchet_get_base_material(next_key, old, CHAIN_KEY_SEED, sizeof CHAIN_KEY_SEED);
 	return ratchet_chainkey_init(new, old->hkdf, next_key, old->index+1);
 }
 

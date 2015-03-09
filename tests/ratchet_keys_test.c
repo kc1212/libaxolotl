@@ -55,8 +55,8 @@ static char* test_chain_key_derivation_v2()
 	struct ratchet_msgkey msgkey;
 	mu_assert("", 0 == ratchet_chainkey_getmsgkey(&msgkey, &chainkey));
 
-	mu_assert("", 0 == memcmp(msgkey.mac_key, mac_key, COMMON_KEY_LEN));
 	mu_assert("", 0 == memcmp(msgkey.cipher_key, message_key, COMMON_KEY_LEN));
+	mu_assert("", 0 == memcmp(msgkey.mac_key, mac_key, COMMON_KEY_LEN));
 	
 	mu_assert("", chainkey.index == 0);
 	mu_assert("", msgkey.counter == 0);
@@ -64,6 +64,7 @@ static char* test_chain_key_derivation_v2()
 	// replace current chainkey with next chainkey
 	mu_assert("", 0 == ratchet_chainkey_getnext(&chainkey, &chainkey));
 	mu_assert("", chainkey.index == 1);
+	mu_assert("", 0 == memcmp(chainkey.key, next_chain_key, COMMON_KEY_LEN));
 
 	// replace current msgkey with next msgkey
 	mu_assert("", 0 == ratchet_chainkey_getmsgkey(&msgkey, &chainkey));
