@@ -26,6 +26,9 @@ enum AXOLOTL_RETURN_CODES {
 	AXOLOTL_TOTAL
 };
 
+#define SUCCESS_OR_RETURN(x) \
+	if ((x) != AXOLOTL_SUCCESS) return x;
+
 #endif
 
 

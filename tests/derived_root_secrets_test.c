@@ -5,21 +5,21 @@
 #include "minunit.h"
 #include "../src/derived_root_secrets.h"
 
-static char* test_drs()
+static char* test_derived_root_secrets()
 {
-	struct drs_data drs;
-	memset(&drs, 0, sizeof drs);
+	struct derived_root_secrets derived_root_secrets;
+	memset(&derived_root_secrets, 0, sizeof derived_root_secrets);
 
-	mu_assert("", DRS_SIZE == 64);
+	mu_assert("", DERIVED_ROOT_SECRETS_SIZE == 64);
 
-	unsigned char in[DRS_SIZE];
-	for (unsigned char i = 0; i < DRS_SIZE; i++) {
+	unsigned char in[DERIVED_ROOT_SECRETS_SIZE];
+	for (unsigned char i = 0; i < DERIVED_ROOT_SECRETS_SIZE; i++) {
 		in[i] = i;
 	}
 
-	drs_init(&drs, in);
-	mu_assert("", 0 == memcmp(drs.root_key, in, 32));
-	mu_assert("", 0 == memcmp(drs.chain_key, in + 32, 32));
+	derived_root_secrets_init(&derived_root_secrets, in);
+	mu_assert("", 0 == memcmp(derived_root_secrets.root_key, in, 32));
+	mu_assert("", 0 == memcmp(derived_root_secrets.chain_key, in + 32, 32));
 
 	return 0;
 }
@@ -28,7 +28,7 @@ int tests_run = 0;
 
 static char* all_tests()
 {
-	mu_run_test(test_drs);
+	mu_run_test(test_derived_root_secrets);
 	return 0;
 }
 

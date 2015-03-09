@@ -3,13 +3,14 @@
 
 #include "derived_root_secrets.h"
 
-int drs_init(struct drs_data* drs, const unsigned char* in)
+int derived_root_secrets_init(struct derived_root_secrets* secrets,
+		const unsigned char* in)
 {
-	if (drs == NULL)
+	if (secrets == NULL)
 		return -1;
 
-	memcpy(drs->root_key, in, 32);
-	memcpy(drs->chain_key, in + 32, 32);
+	memcpy(secrets->root_key, in, 32);
+	memcpy(secrets->chain_key, in + 32, 32);
 	return 0;
 }
 
