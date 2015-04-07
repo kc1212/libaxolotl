@@ -164,22 +164,7 @@ static char* test_root_key_derivation_v2()
 static char* all_tests()
 {
 	mu_run_test(test_chain_key_derivation_v2);
-
-	// TODO investigation is still underway for this test,
-	// the results are all pointing an issue in the crypto_scalarmult_curve25519 library function
-	// it is called by ratchet_rootkey_init and curve_calculate_agreement
-	//
-	// the crypto_scalarmult_curve25519/curve25519_donna library function produced:
-	// pk: ABB8EB29CC80B47109A2265ABE9798485406E32DA268934A9555E84757708A30
-	// sk: 216822EC67EB38049EBAE7B939BAEAEBB151BBB32DB80FD389245AC37A948E50
-	// shared: C384530EA9C6B7AB74EB6EA9BCA113A9353EDA3428A4B6534ECBC4AF35D7126D
-	//
-	// while the java version produced:
-	// pk: ABB8EB29CC80B47109A2265ABE9798485406E32DA268934A9555E84757708A30
-	// sk: 216822EC67EB38049EBAE7B939BAEAEBB151BBB32DB80FD389245AC37A948E50
-	// shared: 3FE8266F8AAF399CC8265A47B517342B6D10F5479F4B417D8A487C28100E4F3C
-	//
-	// run_test(test_root_key_derivation_v2);
+	mu_run_test(test_root_key_derivation_v2);
 	return 0;
 }
 

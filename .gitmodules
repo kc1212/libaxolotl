@@ -1,3 +1,6 @@
 [submodule "ref10"]
 	path = ref10
 	url = https://github.com/kc1212/ref10_extract.git
+[submodule "curve25519-donna"]
+	path = curve25519-donna
+	url = https://github.com/kc1212/curve25519-donna.git
