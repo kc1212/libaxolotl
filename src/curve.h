@@ -3,6 +3,7 @@
 #define _curve_h
 
 #include "common.h"
+#include <stdlib.h>
 
 #define CURVE_KEY_BYTES_LEN COMMON_KEY_LEN
 #define CURVE_SIG_BYTES_LEN 64
